@@ -317,7 +317,3 @@ function QAA()
 	 	end 	
 end
 end
-
-PrintChat("Ugly Nasus")
-PrintChat("Successfully Loaded")
-PrintChat("Have Fun!!!!")
