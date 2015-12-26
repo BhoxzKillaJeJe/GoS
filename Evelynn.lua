@@ -7,7 +7,6 @@ Evelynn:SubMenu("Combo", "Combo")
 Evelynn:SubMenu("AutoQ", "AutoQ")
 Evelynn:SubMenu("LaneClear", "LaneClear")
 Evelynn:SubMenu("JungleClear", "JungleClear")
-Evelynn:SubMenu("Drawing", "Drawing")
 
 Evelynn.Combo:Boolean("CQ", "Use Q", true)
 Evelynn.Combo:Boolean("CW", "Use W", true)
@@ -17,9 +16,11 @@ Evelynn.Combo:Slider("ECR", "Use R at min enemies", 3, 1, 5, 1)
 
 Evelynn.LaneClear:Boolean("LCQ", "Use Q", true)
 Evelynn.LaneClear:Boolean("LCE", "Use E", true)
+Evelynn.LaneClear:Slider("MLC", "LaneClear if mana% is >", 30, 0, 100, 5)
 
 Evelynn.JungleClear:Boolean("JCQ", "Use Q", true)
 Evelynn.JungleClear:Boolean("JCE", "Use E", true)
+Evelynn.JungleClear:Slider("MJC", "JungleClear if mana% is >", 30, 0, 100, 5)
 
 local QRange = GetCastRange(myHero, _Q)
 local ERange = GetCastRange(myHero, _E)
@@ -55,7 +56,7 @@ local function Combo(unit)
 end
 
 local function JungleClear(jminion)
-	if IOW:Mode() == "LaneClear" then
+	if IOW:Mode() == "LaneClear" and GetPercentMP(myHero) >= Evelynn.JungleClear.MJC:Value() then
 		for _,jminion in pairs(minionManager.objects) do
 
 			if IsReady(_Q) and Evelynn.JungleClear.JCQ:Value() and ValidTarget(jminion, QRange) then
@@ -70,7 +71,7 @@ local function JungleClear(jminion)
 end
 
 local function LaneClear(minion)
- 	if IOW:Mode() == "LaneClear" then
+ 	if IOW:Mode() == "LaneClear" and GetPercentMP(myHero) >= Evelynn.LaneClear.MLC:Value() then
 		for i=1,IOW.mobs.maxObjects do 
 		 local minion = IOW.mobs.objects[i]
 
