@@ -20,7 +20,7 @@ local collision=false
 if GotBuff(target, "urgotcorrosivedebuff") >= 1 then
 	extraRange = 200
 	collision = false
-elseif not GotBuff(target, "urgotcorrosivedebuff") >= 1 then
+else
 	extraRange = 0
 	collision = true
 end
