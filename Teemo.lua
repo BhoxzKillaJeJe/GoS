@@ -103,9 +103,9 @@ function QIgnite()
 		local Ignitedmg = 20*GetLevel(myHero)+50
 		local Qdmg = 45 + 45*GetCastLevel(myHero,_Q) + 0.8*GetBonusAP(myHero) + Ludens
 
-		if IsReady(Ignite) and IsReady(_Q) and ValidTarget(enemy, 600) and Ignitedmg + Qdmg > GetCurrentHP(enemy) then
+		if IsReady(Ignite) and IsReady(_Q) and ValidTarget(enemy, 600) and Ignitedmg + Qdmg > GetCurrentHP(enemy) and Teemo.Misc.QIgnite:Value() then
 			CastTargetSpell(enemy, Ignite) 
-			DelayAction(function() CastTargetSpell(enemy, _Q), 0.125)
+			DelayAction(function() CastTargetSpell(enemy, _Q) end, 0.125)
 		end
 	end
 end
