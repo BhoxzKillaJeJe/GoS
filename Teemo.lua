@@ -49,8 +49,8 @@ OnTick(function(myHero)
 	end
 ---KILLSTEAL CODE END---
 ---JUNGLESTEAL CODE---
-	for _,jungle in pairs(MINION_JUNGLE) do
-		if GetTeam(jungle) == 300 then
+	for i,jungle in pairs(minionManager.objects) do
+		if MINION_JUNGLE == GetTeam(jungle) then
 
 			if IsReady(_Q) and ValidTarget(jungle, Qrange) and Teemo.JungleSteal.JSQ:Value() and CalcDamage(myHero, jungle, 0,(45 + 45*GetCastLevel(myHero,_Q) + 0.8*GetBonusAP(myHero) + Ludens)) > GetCurrentHP(jungle) then
 				CastTargetSpell(jungle, _Q)
