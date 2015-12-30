@@ -33,7 +33,7 @@ OnTick(function(myHero)
 
 	if IOW:Mode() == "Combo" then
 ---COMBO CODE---
-		if CanUseSpell(myHero, _Q) == READY and ValidTarget(target, Qrange) and Teemo.Combo.Q:Value() then
+		if IsReady(_Q) and ValidTarget(target, Qrange) and Teemo.Combo.Q:Value() then
 			CastTargetSpell(target, _Q)
 		end
 	end
@@ -42,17 +42,17 @@ OnTick(function(myHero)
 	for i,enemy in pairs(GetEnemyHeroes()) do
 
 		if not IsImmune(enemy, myHero) and IsObjectAlive(enemy) then
-			if CanUseSpell(myHero, _Q) == READY and Teemo.Killsteal.KQ:Value() and ValidTarget(enemy, Qrange) and CalcDamage(myHero, enemy, 0,(45 + 45*GetCastLevel(myHero,_Q) + 0.8*GetBonusAP(myHero) + Ludens)) > GetCurrentHP(enemy) then
+			if IsReady(_Q) and Teemo.Killsteal.KQ:Value() and ValidTarget(enemy, Qrange) and CalcDamage(myHero, enemy, 0,(45 + 45*GetCastLevel(myHero,_Q) + 0.8*GetBonusAP(myHero) + Ludens)) > GetCurrentHP(enemy) then
 				CastTargetSpell(enemy, _Q)
 			end
 		end
 	end
 ---KILLSTEAL CODE END---
 ---JUNGLESTEAL CODE---
-	for _,jungle in pairs(minionManager.objects) do
+	for _,jungle in pairs(MINION_JUNGLE) do
 		if GetTeam(jungle) == 300 then
 
-			if CanUseSpell(myHero, _Q) == READY and ValidTarget(jungle, Qrange) and Teemo.JungleSteal.JSQ:Value() and CalcDamage(myHero, jungle, 0,(45 + 45*GetCastLevel(myHero,_Q) + 0.8*GetBonusAP(myHero) + Ludens)) > GetCurrentHP(jungle) then
+			if IsReady(_Q) and ValidTarget(jungle, Qrange) and Teemo.JungleSteal.JSQ:Value() and CalcDamage(myHero, jungle, 0,(45 + 45*GetCastLevel(myHero,_Q) + 0.8*GetBonusAP(myHero) + Ludens)) > GetCurrentHP(jungle) then
 				CastTargetSpell(jungle, _Q)
 			end
 		end
@@ -65,17 +65,17 @@ end)
 OnDraw(function(myHero)
 	local target = GetCurrentTarget()
 	if Teemo.Drawings.Q:Value() and CanUseSpell(myHero, _Q) == READY then
-		DrawCircle(myHeroPos().x,myHeroPos().y,myHeroPos().z,Qrange,1,100,0xff00ff00)
+		DrawCircle(myHeroPos().x,myHeroPos().y,myHeroPos().z,Qrange,1,80,0xff00ff00)
 	end
 
 	if Teemo.Drawings.R:Value() and CanUseSpell(myHero, _R) == READY then
-		DrawCircle(myHeroPos().x,myHeroPos().y,myHeroPos().z,Rrange,1,100,0xff00ff00)
+		DrawCircle(myHeroPos().x,myHeroPos().y,myHeroPos().z,Rrange,1,80,0xff000000)
 	end
 
 	if Teemo.Drawings.DQ:Value() and CanUseSpell(myHero, _Q) == READY then
 		local target = GetCurrentTarget()
 		if ValidTarget(target, 5000) then
-			DrawDmgOverHpBar(target, GetCurrentHP(target), 0, CalcDamage(myHero, target, 0,(45 + 45*GetCastLevel(myHero,_Q) + 0.8*GetBonusAP(myHero + Ludens))),0xff00ff00)
+			DrawDmgOverHpBar(target, GetCurrentHP(target), 0, CalcDamage(myHero, target, 0,(45 + 45*GetCastLevel(myHero,_Q) + 0.8*GetBonusAP(myHero) + Ludens)),0xff00ff00)
 		end
 	end
 end)
@@ -83,7 +83,7 @@ end)
 function AutoIgnite()
     for _,enemy in pairs(GetEnemyHeroes()) do
         if Ignite and Teemo.Misc.AutoIgnite:Value() then
-			local HPShield = GetCurrentHP(Enemy)+GetDmgShield(enemy)
+			local HPShield = GetCurrentHP(enemy)+GetDmgShield(enemy)
             if IsReady(Ignite) and 20*GetLevel(myHero)+50 > HPShield+(GetHPRegen(enemy)*3) and ValidTarget(enemy, 600) then
               CastTargetSpell(enemy, Ignite)
           end
@@ -99,7 +99,7 @@ end
 
 function QIgnite()
 	for _,enemy in pairs(GetEnemyHeroes()) do
-		local HPShield = GetCurrentHP(Enemy)+GetDmgShield(enemy)
+		local HPShield = GetCurrentHP(enemy)+GetDmgShield(enemy)
 		local Ignitedmg = 20*GetLevel(myHero)+50
 		local Qdmg = 45 + 45*GetCastLevel(myHero,_Q) + 0.8*GetBonusAP(myHero) + Ludens
 
