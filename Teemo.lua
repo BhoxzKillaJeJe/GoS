@@ -52,7 +52,13 @@ OnTick(function(myHero)
 	for i,jungle in pairs(minionManager.objects) do
 		if MINION_JUNGLE == GetTeam(jungle) then
 
-			if IsReady(_Q) and ValidTarget(jungle, Qrange) and Teemo.JungleSteal.JSQ:Value() and CalcDamage(myHero, jungle, 0,(45 + 45*GetCastLevel(myHero,_Q) + 0.8*GetBonusAP(myHero) + Ludens)) > GetCurrentHP(jungle) then
+			if IsReady(_Q) and ValidTarget(jungle, Qrange) and Teemo.JungleSteal.JSQ:Value() and CalcDamage(myHero, jungle, 0,(45 + 45*GetCastLevel(myHero,_Q) + 0.8*GetBonusAP(myHero) + Ludens)) > GetCurrentHP(jungle) and GetObjectName(jungle) == "SRU_Dragon" then
+				CastTargetSpell(jungle, _Q)
+			elseif IsReady(_Q) and ValidTarget(jungle, Qrange) and Teemo.JungleSteal.JSQ:Value() and CalcDamage(myHero, jungle, 0,(45 + 45*GetCastLevel(myHero,_Q) + 0.8*GetBonusAP(myHero) + Ludens)) > GetCurrentHP(jungle) and GetObjectName(jungle) == "SRU_Baron" then
+				CastTargetSpell(jungle, _Q)
+			elseif IsReady(_Q) and ValidTarget(jungle, Qrange) and Teemo.JungleSteal.JSQ:Value() and CalcDamage(myHero, jungle, 0,(45 + 45*GetCastLevel(myHero,_Q) + 0.8*GetBonusAP(myHero) + Ludens)) > GetCurrentHP(jungle) and GetObjectName(jungle) == "SRU_Blue" then
+				CastTargetSpell(jungle, _Q)
+			elseif IsReady(_Q) and ValidTarget(jungle, Qrange) and Teemo.JungleSteal.JSQ:Value() and CalcDamage(myHero, jungle, 0,(45 + 45*GetCastLevel(myHero,_Q) + 0.8*GetBonusAP(myHero) + Ludens)) > GetCurrentHP(jungle) and GetObjectName(jungle) == "SRU_Red" then
 				CastTargetSpell(jungle, _Q)
 			end
 		end
