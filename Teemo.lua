@@ -26,7 +26,7 @@ Teemo.Drawings:Boolean("DQ", "Draw Dmg Q", true)
  
 local Qrange = GetCastRange(myHero, _Q)
 local Rrange = GetCastRange(myHero, _R)
-local Ludens = 0
+local LudensStacks = 0
 
 OnTick(function(myHero)
 	local target = GetCurrentTarget()
@@ -42,23 +42,23 @@ OnTick(function(myHero)
 	for i,enemy in pairs(GetEnemyHeroes()) do
 
 		if not IsImmune(enemy, myHero) and IsObjectAlive(enemy) then
-			if IsReady(_Q) and Teemo.Killsteal.KQ:Value() and ValidTarget(enemy, Qrange) and CalcDamage(myHero, enemy, 0,(45 + 45*GetCastLevel(myHero,_Q) + 0.8*GetBonusAP(myHero) + Ludens)) > GetCurrentHP(enemy) then
+			if IsReady(_Q) and Teemo.Killsteal.KQ:Value() and ValidTarget(enemy, Qrange) and CalcDamage(myHero, enemy, 0,(45 + 45*GetCastLevel(myHero,_Q) + 0.8*GetBonusAP(myHero) + Ludens())) > GetCurrentHP(enemy) then
 				CastTargetSpell(enemy, _Q)
 			end
 		end
 	end
 ---KILLSTEAL CODE END---
 ---JUNGLESTEAL CODE---
-	for i,jungle in pairs(minionManager.objects) do
+	for _,jungle in pairs(minionManager.objects) do
 		if MINION_JUNGLE == GetTeam(jungle) then
 
-			if IsReady(_Q) and ValidTarget(jungle, Qrange) and Teemo.JungleSteal.JSQ:Value() and CalcDamage(myHero, jungle, 0,(45 + 45*GetCastLevel(myHero,_Q) + 0.8*GetBonusAP(myHero) + Ludens)) > GetCurrentHP(jungle) and GetObjectName(jungle) == "SRU_Dragon" then
+			if IsReady(_Q) and ValidTarget(jungle, Qrange) and Teemo.JungleSteal.JSQ:Value() and CalcDamage(myHero, jungle, 0,(45 + 45*GetCastLevel(myHero,_Q) + 0.8*GetBonusAP(myHero) + Ludens())) > GetCurrentHP(jungle) and GetObjectName(jungle) == "Dragon" then
 				CastTargetSpell(jungle, _Q)
-			elseif IsReady(_Q) and ValidTarget(jungle, Qrange) and Teemo.JungleSteal.JSQ:Value() and CalcDamage(myHero, jungle, 0,(45 + 45*GetCastLevel(myHero,_Q) + 0.8*GetBonusAP(myHero) + Ludens)) > GetCurrentHP(jungle) and GetObjectName(jungle) == "SRU_Baron" then
+			elseif IsReady(_Q) and ValidTarget(jungle, Qrange) and Teemo.JungleSteal.JSQ:Value() and CalcDamage(myHero, jungle, 0,(45 + 45*GetCastLevel(myHero,_Q) + 0.8*GetBonusAP(myHero) + Ludens())) > GetCurrentHP(jungle) and GetObjectName(jungle) == "Baron" then
 				CastTargetSpell(jungle, _Q)
-			elseif IsReady(_Q) and ValidTarget(jungle, Qrange) and Teemo.JungleSteal.JSQ:Value() and CalcDamage(myHero, jungle, 0,(45 + 45*GetCastLevel(myHero,_Q) + 0.8*GetBonusAP(myHero) + Ludens)) > GetCurrentHP(jungle) and GetObjectName(jungle) == "SRU_Blue" then
+			elseif IsReady(_Q) and ValidTarget(jungle, Qrange) and Teemo.JungleSteal.JSQ:Value() and CalcDamage(myHero, jungle, 0,(45 + 45*GetCastLevel(myHero,_Q) + 0.8*GetBonusAP(myHero) + Ludens())) > GetCurrentHP(jungle) and GetObjectName(jungle) == "Blue" then
 				CastTargetSpell(jungle, _Q)
-			elseif IsReady(_Q) and ValidTarget(jungle, Qrange) and Teemo.JungleSteal.JSQ:Value() and CalcDamage(myHero, jungle, 0,(45 + 45*GetCastLevel(myHero,_Q) + 0.8*GetBonusAP(myHero) + Ludens)) > GetCurrentHP(jungle) and GetObjectName(jungle) == "SRU_Red" then
+			elseif IsReady(_Q) and ValidTarget(jungle, Qrange) and Teemo.JungleSteal.JSQ:Value() and CalcDamage(myHero, jungle, 0,(45 + 45*GetCastLevel(myHero,_Q) + 0.8*GetBonusAP(myHero) + Ludens())) > GetCurrentHP(jungle) and GetObjectName(jungle) == "Red" then
 				CastTargetSpell(jungle, _Q)
 			end
 		end
@@ -81,7 +81,7 @@ OnDraw(function(myHero)
 	if Teemo.Drawings.DQ:Value() and CanUseSpell(myHero, _Q) == READY then
 		local target = GetCurrentTarget()
 		if ValidTarget(target, 5000) then
-			DrawDmgOverHpBar(target, GetCurrentHP(target), 0, CalcDamage(myHero, target, 0,(45 + 45*GetCastLevel(myHero,_Q) + 0.8*GetBonusAP(myHero) + Ludens)),0xff00ff00)
+			DrawDmgOverHpBar(target, GetCurrentHP(target), 0, CalcDamage(myHero, target, 0,(45 + 45*GetCastLevel(myHero,_Q) + 0.8*GetBonusAP(myHero) + Ludens())),0xff00ff00)
 		end
 	end
 end)
@@ -97,17 +97,11 @@ function AutoIgnite()
     end
 end
 
----LUDENS ECHO CODE---        		
-if GotBuff(myHero, "itemmagicshankcharge") == 100 then
-	Ludens = Ludens + 0.1*GetBonusAP(myHero) + 100
-end 
----LUDENS ECHO CODE END---
-
 function QIgnite()
 	for _,enemy in pairs(GetEnemyHeroes()) do
 		local HPShield = GetCurrentHP(enemy)+GetDmgShield(enemy)
-		local Ignitedmg = 20*GetLevel(myHero)+50
-		local Qdmg = 45 + 45*GetCastLevel(myHero,_Q) + 0.8*GetBonusAP(myHero) + Ludens
+		local Ignitedmg = 20*GetLevel(myHero)
+		local Qdmg = 45 + 45*GetCastLevel(myHero,_Q) + 0.8*GetBonusAP(myHero) + Ludens()
 
 		if IsReady(Ignite) and IsReady(_Q) and ValidTarget(enemy, 600) and Ignitedmg + Qdmg > GetCurrentHP(enemy) and Teemo.Misc.QIgnite:Value() then
 			CastTargetSpell(enemy, Ignite) 
@@ -115,3 +109,16 @@ function QIgnite()
 		end
 	end
 end
+
+---LUDENS ECHO CODE---
+OnUpdateBuff(function(unit,buff) ---STOLE IT FROM DEFTLIB
+  if unit == myHero then
+    if buff.Name == "itemmagicshankcharge" then 
+    LudensStacks = buff.Count
+    end
+end
+
+function Ludens()
+	return LudensStacks == 100 and 100+0.1*GetBonusAP(myHero) or 0
+end
+---LUDENS ECHO CODE END---
