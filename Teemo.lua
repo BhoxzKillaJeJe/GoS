@@ -2,7 +2,7 @@ if GetObjectName(GetMyHero()) ~= "Teemo" then return end
 
 require('Inspired')
  
-Teemo = MenuConfig("El Capitan Teemo", "El Capitan Teemo")
+Teemo = Menu("Teemo", "El Capitan Teemo")
 Teemo:SubMenu("Combo", "Combo")
 Teemo:SubMenu("Killsteal", "Killsteal")
 Teemo:SubMenu("JungleSteal", "JungleSteal")
@@ -25,16 +25,16 @@ Teemo.Drawings:Boolean("R", "Draw R", true)
 Teemo.Drawings:Boolean("DQ", "Draw Dmg Q", true)
  
 local Qrange = GetCastRange(myHero, _Q)
-local Rrange = GetCastRange(myHero, _R)
 local LudensStacks = 0
+local target = TargetSelector(Qrange,TARGET_LESS_CAST_PRIORITY,DAMAGE_MAGIC,true,false)
 
 OnTick(function(myHero)
-	local target = GetCurrentTarget()
+    local Qtarget = target:GetTarget()
 
 	if IOW:Mode() == "Combo" then
 ---COMBO CODE---
 		if IsReady(_Q) and ValidTarget(target, Qrange) and Teemo.Combo.Q:Value() then
-			CastTargetSpell(target, _Q)
+			CastTargetSpell(Qtarget, _Q)
 		end
 	end
 ---COMBO CODE END---
@@ -71,11 +71,11 @@ end)
 OnDraw(function(myHero)
 	local target = GetCurrentTarget()
 	if Teemo.Drawings.Q:Value() and CanUseSpell(myHero, _Q) == READY then
-		DrawCircle(myHeroPos().x,myHeroPos().y,myHeroPos().z,Qrange,1,80,0xff00ff00)
+		DrawCircle(myHeroPos().x,myHeroPos().y,myHeroPos().z,Qrange,5,80,0xff00ff00)
 	end
 
 	if Teemo.Drawings.R:Value() and CanUseSpell(myHero, _R) == READY then
-		DrawCircle(myHeroPos().x,myHeroPos().y,myHeroPos().z,Rrange,1,80,0xff000000)
+		DrawCircle(myHeroPos().x,myHeroPos().y,myHeroPos().z,GetCastRange(myHero, _R),5,80,0xffff0000)
 	end
 
 	if Teemo.Drawings.DQ:Value() and CanUseSpell(myHero, _Q) == READY then
@@ -111,7 +111,7 @@ function QIgnite()
 end
 
 ---LUDENS ECHO CODE---
-OnUpdateBuff(function(unit,buff) ---STOLE IT FROM DEFTLIB
+OnUpdateBuff(function(unit,buff)
   	if unit == myHero then
     	if buff.Name == "itemmagicshankcharge" then 
     		LudensStacks = buff.Count
