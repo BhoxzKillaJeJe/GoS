@@ -35,20 +35,20 @@ spellData = {
 -------------------------------
 -----Vars--------------------
 local pstacks = {}
-local Qcast = (CanUseSpell(myHero,_Q) == READYNONCAST) or (CanUseSpell(myHero,_Q) == 4)
 target1 = TargetSelector(550,TARGET_LESS_CAST_PRIORITY,DAMAGE_PHYSICAL,true,false)
 IOW.Config.s.stick:Value(0)
 -----------------------------
 
 function Qwalk()
-	local Qtarget = target1:GetTarget()
+	Qcast = (CanUseSpell(myHero,_Q) == READYNONCAST) or (CanUseSpell(myHero,_Q) == UNKNOWN)
+	local target = GetCurrentTarget()
 	if target and Qcast then
-		if GetDistance(Qtarget) < 230 then
-			local vec = Vector(myHero) + Vector(Vector(myHero)-Vector(Qtarget)):normalized()*(225)
+		if GetDistance(target) < 230 then
+			local vec = Vector(myHero) + Vector(Vector(myHero)-Vector(target)):normalized()*(225)
 			IOW.movementEnabled = false
 			MoveToXYZ(vec)
 			return
-		elseif GetDistance(Qtarget) > 230 and GetDistance(Qtarget) > 300 then
+		elseif GetDistance(target) > 230 and GetDistance(target) < 300 then
 			IOW.movementEnabled = false
 			HoldPosition()
 			return
@@ -148,14 +148,15 @@ end)
 
 OnDraw(function(myHero)
 	
-	if IsReady(_Q) and menu.d.dq:Value() then
-		DrawCircle(GetOrigin(myHero),450,1,50,ARGB(180, 255, 255, 255))
+	if menu.d.dq:Value() then
+		DrawCircle(GetOrigin(myHero),450,1,50,ARGB(180, 0, 255, 0))
+		DrawCircle(GetOrigin(myHero),230,1,50,ARGB(180, 0, 255, 0))
 	end
-	if IsReady(_E) and menu.d.de:Value() then
-		DrawCircle(GetOrigin(myHero),570,1,50,ARGB(180, 255, 255, 255))
+	if menu.d.de:Value() then
+		DrawCircle(GetOrigin(myHero),570,1,50,ARGB(180, 0, 0, 255))
 	end
-	if IsReady(_R) and menu.d.dr:Value() then
-		DrawCircle(GetOrigin(myHero),450,1,50,ARGB(180, 255, 255, 255))
+	if menu.d.dr:Value() then
+		DrawCircle(GetOrigin(myHero),450,1,50,ARGB(180, 255, 0, 0))
 	end
 
 	for i,enemy in pairs(GetEnemyHeroes()) do
