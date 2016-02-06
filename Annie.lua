@@ -20,15 +20,14 @@ menu.c:Slider("hcr", "R if enemy hp% is <", 45,5,100,5)
 menu.h:Boolean("hq", "Use Q", true)
 menu.h:Boolean("hw", "Use W", true)
 
-menu.m:KeyBinding("aq", "AutoLastHit", string.byte("J"), true)
+local Ignite = (GetCastName(GetMyHero(),SUMMONER_1):lower():find("summonerdot") and SUMMONER_1 or (GetCastName(GetMyHero(),SUMMONER_2):lower():find("summonerdot") and SUMMONER_2 or nil))
 if Ignite ~= nil then menu.m:Boolean("aign", "Auto Ignite", true) end
 
 menu.ks:Boolean("ksq", "Use Q", true)
 menu.ks:Boolean("ksw", "Use W", true)
 menu.ks:Boolean("ksr", "Use R", true)
 
---menu.lh:Boolean("q", "LastHit w/ Q", true)
---menu.lh:Boolean("w", "LastHit w/ W", true)
+menu.lh:Boolean("q", "LastHit w/ Q", true)
 
 menu.d:Boolean("dq", "Draw Q", false)
 menu.d:Boolean("dw", "Draw W", false)
@@ -68,7 +67,7 @@ function Combo()
 			CastTargetSpell(Qtarget,_Q)
 		end
 
-		if IsReady(_W) and ValidTarget(target,SpellData[_W].range) and menu.c.cw:Value()	then
+		if IsReady(_W) and ValidTarget(target,SpellData[_W].range) and menu.c.cw:Value() then
 			CastSkillShot(_W,GetOrigin(target))
 		end
 	end 
@@ -92,20 +91,22 @@ end
 function AutoR()
 	for i,enemy in pairs(GetEnemyHeroes()) do
 		
-		if IsReady(_R) and ValidTarget(enemy,SpellData[_R].range) and EnemiesAround(GetOrigin(myHero),enemy) >= menu.c.acr:Value() and menu.c.cr:Value() and pstun == true then
+		if IsReady(_R) and ValidTarget(enemy,SpellData[_R].range) and EnemiesAround(GetOrigin(enemy),250) >= menu.c.acr:Value() and menu.c.cr:Value() and pstun == true then
 			CastSkillShot(_R,GetOrigin(enemy))
 		end
 	end
 end
 
 function AutoQ()
-	if not IOW.isWindingUp then
-		for _,minions in pairs(minionManager.objects) do
-			if GetTeam(minions) == MINION_ENEMY and ValidTarget(minions,SpellData[_Q].range) and menu.m.aq:Value() then
-				local predhp = IOW:PredictHealth(minions, GetDistance(minions)*0.5+250)
-				if predhp > 0 then
-					if predhp < CalcDamage(myHero,minions,0,SpellData[_Q].dmg()) then
-						CastTargetSpell(minions,_Q)
+	if IOW:Mode() == "LastHit" then
+		if not IOW.isWindingUp then
+			for _,minions in pairs(minionManager.objects) do
+				if GetTeam(minions) == MINION_ENEMY and ValidTarget(minions,SpellData[_Q].range) and menu.lh.q:Value() then
+					local predhp = IOW:PredictHealth(minions, GetDistance(minions)*0.5+250)
+					if predhp > 0 then
+						if predhp < CalcDamage(myHero,minions,0,SpellData[_Q].dmg()) then
+							CastTargetSpell(minions,_Q)
+						end
 					end
 				end
 			end
@@ -194,13 +195,13 @@ OnDraw(function(myHero)
 	local enemyhp = GetCurrentHP(target) + GetDmgShield(target) + GetMagicShield(target)
 	
 	if menu.d.dq:Value() and IsReady(_Q) then
-		DrawCircle(GetOrigin(myHero),625,5,80,0xff00ff00)
+		DrawCircle(GetOrigin(myHero),625,5,80,ARGB(255,0,255,0))
 	end
 	if menu.d.dw:Value() and IsReady(_W) then
-		DrawCircle(GetOrigin(myHero),625,5,80,0xff00ff00)
+		DrawCircle(GetOrigin(myHero),625,5,80,ARGB(255,0,255,0))
 	end
 	if menu.d.dr:Value() and IsReady(_R) then
-		DrawCircle(GetOrigin(myHero),600,5,80,0xff00ff00)
+		DrawCircle(GetOrigin(myHero),600,5,80,ARGB(255,255,255,0))
 	end
 	if menu.d.dmg:Value() and ValidTarget(target,2000) and IsReady(_Q) then
 		DrawDmgOverHpBar(target,enemyhp,0,Qdmg,ARGB(180,255,255,255))
