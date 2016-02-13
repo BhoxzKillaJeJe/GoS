@@ -1,125 +1,107 @@
-if GetObjectName(GetMyHero()) ~= "Teemo" then return end
+if GetObjectName(myHero) ~= "Teemo" then return end
 
 require('Inspired')
- 
-Teemo = Menu("Teemo", "El Capitan Teemo")
-Teemo:SubMenu("Combo", "Combo")
-Teemo:SubMenu("Killsteal", "Killsteal")
-Teemo:SubMenu("JungleSteal", "JungleSteal")
-Teemo:SubMenu("Drawings", "Drawings")
 
-if Ignite ~= nil then
-Teemo:SubMenu("Misc", "Misc")
-Teemo.Misc:Boolean("AutoIgnite", "AutoIgnite", true)
-Teemo.Misc:Boolean("QIgnite", "QIgnite", true)
+menu = Menu("Teemo", "Cpt. Teemo")
+menu:SubMenu("c", "Combo")
+menu:SubMenu("ks", "KillSteal")
+menu:SubMenu("js", "JungleSteal")
+menu:SubMenu("m", "Misc")
+menu:SubMenu("d", "Drawings")
+
+menu.c:Boolean("cq", "Use Q", true)
+
+menu.ks:Boolean("ksq", "KS w/ Q", true)
+
+menu.js:Boolean("jsq", "JS w/ Q", true)
+
+Ignite = (GetCastName(GetMyHero(),SUMMONER_1):lower():find("summonerdot") and SUMMONER_1 or (GetCastName(GetMyHero(),SUMMONER_2):lower():find("summonerdot") and SUMMONER_2 or nil))
+menu.m:Boolean("ign", "Auto Ignite", true)
+menu.m:Boolean("qign", "Q+Ignite", true)
+
+menu.d:Boolean("dq", "Draw Q", true)
+menu.d:Boolean("dr", "Draw R", true)
+menu.d:Boolean("dmg", "Draw Dmg", true)
+
+-- Vars
+local target = TargetSelector(580,TARGET_LESS_CAST_PRIORITY,DAMAGE_MAGIC,true,false)
+local range = GetCastRange(myHero,_Q)
+-- 
+
+function Combo()
+	if IOW:Mode() == "Combo" then
+		local qtarget = target:GetTarget()
+
+		if Ready(_Q) and ValidTarget(qtarget,range) and menu.c.cq:Value() then
+			CastTargetSpell(qtarget,_Q)
+			IOW:ResetAA()
+		end
+	end
 end
 
-Teemo.Combo:Boolean("Q", "Use Q", true)
+function KS()
+	for i,enemy in pairs(GetEnemyHeroes()) do
+		local qdmg = CalcDamage(myHero,enemy,0,(45+45*GetCastLevel(myHero,_Q)+0.8*GetBonusAP(myHero)))
+		local ignitedmg = 20*GetLevel(myHero)+50
+		local hp = GetCurrentHP(enemy) + GetDmgShield(enemy) + GetMagicShield(enemy)
 
-Teemo.Killsteal:Boolean("KQ", "KS w/ Q", true) 
+		if IsReady(_Q) and ValidTarget(enemy,range) and qdmg > hp and menu.ks.ksq:Value() then
+			CastTargetSpell(enemy,_Q)
+		elseif CanUseSpell(myHero,Ignite) == READY and ValidTarget(enemy,600) and ignitedmg > GetCurrentHP(enemy)+GetDmgShield(enemy) and menu.m.ign:Value() then
+			CastTargetSpell(enemy,Ignite)
+		elseif CanUseSpell(myHero,Ignite) == READY and IsReady(_Q) and ValidTarget(enemy,600) and qdmg+ignitedmg > hp and menu.m.qign:Value() then
+			CastTargetSpell(enemy,Ignite)
+			CastTargetSpell(enemy,_Q)
+		end
+	end
+end
 
-Teemo.JungleSteal:Boolean("JSQ", "JungleSteal w/ Q", true)
- 
-Teemo.Drawings:Boolean("Q", "Draw Q", true)
-Teemo.Drawings:Boolean("R", "Draw R", true)
-Teemo.Drawings:Boolean("DQ", "Draw Dmg Q", true)
- 
-local Qrange = GetCastRange(myHero, _Q)
-local LudensStacks = 0
-local target = TargetSelector(Qrange,TARGET_LESS_CAST_PRIORITY,DAMAGE_MAGIC,true,false)
+function JS()
+	for _,jminions in pairs(minionManager.objects) do
+		if GetTeam(jminions) == 300 then
+			local jsqdmg = CalcDamage(myHero,jminions,0,(45+45*GetCastLevel(myHero,_Q)+0.8*GetBonusAP(myHero)))
+
+			if Ready(_Q) and ValidTarget(jminions,range) and jsqdmg > GetCurrentHP(jminions) and menu.js.jsq:Value() then
+				if GetObjectName(jminions) == "SRU_Dragon" then
+					CastTargetSpell(jminions,_Q)
+				elseif GetObjectName(jminions) == "SRU_Baron" then
+					CastTargetSpell(jminions,_Q)
+				elseif GetObjectName(jminions) == "SRU_Blue" then
+					CastTargetSpell(jminions,_Q)
+				elseif GetObjectName(jminions) == "SRU_Red" then
+					CastTargetSpell(jminions,_Q)
+				end
+			end
+		end
+	end
+end
 
 OnTick(function(myHero)
-    local Qtarget = target:GetTarget()
-
-	if IOW:Mode() == "Combo" then
----COMBO CODE---
-		if IsReady(_Q) and ValidTarget(target, Qrange) and Teemo.Combo.Q:Value() then
-			CastTargetSpell(Qtarget, _Q)
-		end
+	if not IsDead(myHero) then
+		Combo()
+		KS()
+		JS()
 	end
----COMBO CODE END---
----KILLSTEAL CODE---
-	for i,enemy in pairs(GetEnemyHeroes()) do
-
-		if not IsImmune(enemy, myHero) and IsObjectAlive(enemy) then
-			if IsReady(_Q) and Teemo.Killsteal.KQ:Value() and ValidTarget(enemy, Qrange) and CalcDamage(myHero, enemy, 0,(45 + 45*GetCastLevel(myHero,_Q) + 0.8*GetBonusAP(myHero) + Ludens())) > GetCurrentHP(enemy) then
-				CastTargetSpell(enemy, _Q)
-			end
-		end
-	end
----KILLSTEAL CODE END---
----JUNGLESTEAL CODE---
-	for _,jungle in pairs(minionManager.objects) do
-		if GetTeam(jungle) == 300 then
-
-			if IsReady(_Q) and ValidTarget(jungle, Qrange) and Teemo.JungleSteal.JSQ:Value() and CalcDamage(myHero, jungle, 0,(45 + 45*GetCastLevel(myHero,_Q) + 0.8*GetBonusAP(myHero) + Ludens())) > GetCurrentHP(jungle) and GetObjectName(jungle) == "SRU_Dragon" then
-				CastTargetSpell(jungle, _Q)
-			elseif IsReady(_Q) and ValidTarget(jungle, Qrange) and Teemo.JungleSteal.JSQ:Value() and CalcDamage(myHero, jungle, 0,(45 + 45*GetCastLevel(myHero,_Q) + 0.8*GetBonusAP(myHero) + Ludens())) > GetCurrentHP(jungle) and GetObjectName(jungle) == "SRU_Baron" then
-				CastTargetSpell(jungle, _Q)
-			elseif IsReady(_Q) and ValidTarget(jungle, Qrange) and Teemo.JungleSteal.JSQ:Value() and CalcDamage(myHero, jungle, 0,(45 + 45*GetCastLevel(myHero,_Q) + 0.8*GetBonusAP(myHero) + Ludens())) > GetCurrentHP(jungle) and GetObjectName(jungle) == "SRU_Blue" then
-				CastTargetSpell(jungle, _Q)
-			elseif IsReady(_Q) and ValidTarget(jungle, Qrange) and Teemo.JungleSteal.JSQ:Value() and CalcDamage(myHero, jungle, 0,(45 + 45*GetCastLevel(myHero,_Q) + 0.8*GetBonusAP(myHero) + Ludens())) > GetCurrentHP(jungle) and GetObjectName(jungle) == "SRU_Red" then
-				CastTargetSpell(jungle, _Q)
-			end
-		end
-	end
----JUNGLESTEAL CODE END---	
-	AutoIgnite()
-	QIgnite()
 end)
 
 OnDraw(function(myHero)
-	local target = GetCurrentTarget()
-	if Teemo.Drawings.Q:Value() and CanUseSpell(myHero, _Q) == READY then
-		DrawCircle(myHeroPos().x,myHeroPos().y,myHeroPos().z,Qrange,5,80,0xff00ff00)
+
+	if menu.d.dq:Value() then
+		DrawCircle(GetOrigin(myHero),range,1,70,ARGB(255,0,255,0))
 	end
 
-	if Teemo.Drawings.R:Value() and CanUseSpell(myHero, _R) == READY then
-		DrawCircle(myHeroPos().x,myHeroPos().y,myHeroPos().z,GetCastRange(myHero, _R),5,80,0xffff0000)
+	if menu.d.dr:Value() then
+		DrawCircle(GetOrigin(myHero),GetCastRange(myHero,_R),1,70,ARGB(255,255,255,0))
 	end
 
-	if Teemo.Drawings.DQ:Value() and CanUseSpell(myHero, _Q) == READY then
-		local target = GetCurrentTarget()
-		if ValidTarget(target, 5000) then
-			DrawDmgOverHpBar(target, GetCurrentHP(target), 0, CalcDamage(myHero, target, 0,(45 + 45*GetCastLevel(myHero,_Q) + 0.8*GetBonusAP(myHero) + Ludens())),0xff00ff00)
+	for k,v in pairs(GetEnemyHeroes()) do
+		local qdmg = CalcDamage(myHero,v,0,(45+45*GetCastLevel(myHero,_Q)+0.8*GetBonusAP(myHero)))
+		local enemyhp = GetCurrentHP(v) + GetMagicShield(v) + GetDmgShield(v)
+
+		if menu.d.dmg:Value() and ValidTarget(v,5000) then
+			DrawDmgOverHpBar(v,enemyhp,0,qdmg,ARGB(255,0,255,0))
 		end
 	end
 end)
 
-function AutoIgnite()
-    for _,enemy in pairs(GetEnemyHeroes()) do
-        if Ignite and Teemo.Misc.AutoIgnite:Value() then
-			local HPShield = GetCurrentHP(enemy)+GetDmgShield(enemy)
-            if IsReady(Ignite) and 20*GetLevel(myHero)+50 > HPShield+(GetHPRegen(enemy)*3) and ValidTarget(enemy, 600) then
-              CastTargetSpell(enemy, Ignite)
-          end
-        end 
-    end
-end
-
-function QIgnite()
-	for _,enemy in pairs(GetEnemyHeroes()) do
-		local HPShield = GetCurrentHP(enemy)+GetDmgShield(enemy)
-		local Ignitedmg = 20*GetLevel(myHero)
-		local Qdmg = 45 + 45*GetCastLevel(myHero,_Q) + 0.8*GetBonusAP(myHero) + Ludens()
-
-		if IsReady(Ignite) and IsReady(_Q) and ValidTarget(enemy, 600) and Ignitedmg + Qdmg > GetCurrentHP(enemy) and Teemo.Misc.QIgnite:Value() then
-			CastTargetSpell(enemy, Ignite) 
-			DelayAction(function() CastTargetSpell(enemy, _Q) end, 0.125)
-		end
-	end
-end
-
----LUDENS ECHO CODE---
-OnUpdateBuff(function(unit,buff)
-  	if unit == myHero then
-    	if buff.Name == "itemmagicshankcharge" then 
-    		LudensStacks = buff.Count
-    	end
-	end
-end)
-
-function Ludens()
-	return LudensStacks == 100 and 100+0.1*GetBonusAP(myHero) or 0
-end
----LUDENS ECHO CODE END---
+PrintChat("<font color=\"#990000\"><b>[Teemo Loaded]</b></font>")
